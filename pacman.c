@@ -1,54 +1,65 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "pacman.h"
+#include "mapa.h"
 
+MAPA m;
 
-char** mapa;
-int linhas;
-int colunas;
-
-
-void libera_memoria(){
-    for (int i = 0; i < linhas; i++){
-        free(mapa[i]);
-    }   
-    free(mapa);
+int acabou(){
+    return 0;
 }
 
-void le_mapa(){
-    FILE* f;
-    f = fopen("mapa.txt", "r");
-    if(f==0){
-       printf("Erro na leitura do mapa !\n");
-       exit(1);
+void move(char comando){
+    int x;
+    int y;
+
+    // acha a posição do pacman
+    for (int i = 0; i < m.linhas; i++){
+        for (int j = 0; j < m.colunas; j++){
+            if(m.matriz[i][j]=='@'){
+                x = i;
+                y = j;
+                break;
+            }
+        }
     }
 
-    fscanf(f,"%d %d", &linhas, &colunas);
 
-    aloca_memoria();
-
-    for (int i = 0; i < 5; i++){
-        fscanf(f, "%s", mapa[i]);
+    switch(comando){
+    case 'a':
+        m.matriz[x][y-1] = '@';
+        break;
+    case 'w':
+        m.matriz[x-1][y] = '@';
+        break;
+    case 's':
+        m.matriz[x+1][y] = '@';
+        break;
+    case 'd':
+        m.matriz[x][y+1] = '@';
+        break;
     }
 
-    fclose(f);
-}
-
-void aloca_memoria(){
-    mapa = malloc(sizeof(char*) * linhas);
-    for (int i = 0; i < linhas; i++){
-        mapa[i] = malloc(sizeof(char) * colunas+1);
-    }
+    //preenche a posisão anterior para não ter dois pacmans
+    m.matriz[x][y] = '.';
 }
 
 int main(){
     
 
-    le_mapa();
+    le_mapa(&m);
 
-    for (int i = 0; i < 5; i++){
-        printf("%s\n",mapa[i]);
-    }
+    do
+    {
 
-    libera_memoria();
+        imprime_mapa(&m);
+
+        char comando;
+        scanf(" %c", &comando);
+        move(comando);
+        
+    } while (!acabou());
+    
+
+    libera_mapa(&m);
 }
